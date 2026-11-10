@@ -1,0 +1,14 @@
+# Projetos de referência (somente leitura, não versionados aqui)
+referencia/
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# Variáveis de ambiente locais
+.env
+
+# Configurações locais do Android Studio
+android/.idea/
