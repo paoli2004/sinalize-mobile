@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: sinalize-api
+
+  # Conexão com o PostgreSQL do docker-compose.yml (raiz do repositório).
+  # Os valores podem ser sobrescritos por variáveis de ambiente.
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/sinalize}
+    username: ${DB_USER:sinalize}
+    password: ${DB_PASSWORD:sinalize}
+
+  jpa:
+    # O esquema é responsabilidade do Flyway; o Hibernate só valida o mapeamento.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  jackson:
+    # Mantém os nomes de campo do projeto original (criado_em, quiz_palavras...).
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: always
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+sinalize:
+  # Usuário considerado "logado" enquanto não há autenticação (criado pela migration V2).
+  usuario-padrao-id: 1
+  quiz:
+    # Número máximo de palavras sorteadas por quiz (como no projeto original).
+    quantidade-palavras: 5

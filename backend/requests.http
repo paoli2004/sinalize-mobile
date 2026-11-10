@@ -1,0 +1,194 @@
+### Requisições de exemplo da API Sinalize
+### Use com o HTTP Client do IntelliJ ou com a extensão "REST Client" do VS Code.
+### Pré-requisito: banco (docker compose up -d) e API (mvnw spring-boot:run) no ar.
+
+@baseUrl = http://localhost:8080
+
+### Health check
+GET {{baseUrl}}/actuator/health
+
+###############################################################################
+# CATEGORIAS
+###############################################################################
+
+### Listar categorias
+GET {{baseUrl}}/categorias
+
+### Buscar categoria por id
+GET {{baseUrl}}/categorias/1
+
+### Buscar categoria inexistente (404)
+GET {{baseUrl}}/categorias/9999
+
+### Criar categoria (201 + header Location)
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nome": "Esportes",
+  "descricao": "Modalidades esportivas."
+}
+
+### Criar categoria inválida (400 com erros por campo)
+POST {{baseUrl}}/categorias
+Content-Type: application/json
+
+{
+  "nome": ""
+}
+
+### Atualizar categoria parcialmente (só o nome)
+PATCH {{baseUrl}}/categorias/1
+Content-Type: application/json
+
+{
+  "nome": "Saudações e cortesia"
+}
+
+### Excluir categoria (204). Ajuste o id para o da categoria criada acima.
+DELETE {{baseUrl}}/categorias/7
+
+###############################################################################
+# PALAVRAS
+###############################################################################
+
+### Listar palavras (com categorias)
+GET {{baseUrl}}/palavras
+
+### Buscar palavra por id
+GET {{baseUrl}}/palavras/1
+
+### Sortear 3 palavras aleatórias (padrão)
+GET {{baseUrl}}/palavras/aleatorias
+
+### Sortear 3 palavras, exceto as de id 1 e 2 (alternativas erradas do quiz)
+GET {{baseUrl}}/palavras/aleatorias?excluir=1,2&quantidade=3
+
+### Quantidade fora do limite (400)
+GET {{baseUrl}}/palavras/aleatorias?quantidade=50
+
+### Criar palavra (201)
+POST {{baseUrl}}/palavras
+Content-Type: application/json
+
+{
+  "palavra": "Lilás",
+  "categoria_ids": [3]
+}
+
+### Criar palavra com categoria inexistente (404)
+POST {{baseUrl}}/palavras
+Content-Type: application/json
+
+{
+  "palavra": "Lilás",
+  "categoria_ids": [3, 9999]
+}
+
+### Criar palavra sem categoria (400)
+POST {{baseUrl}}/palavras
+Content-Type: application/json
+
+{
+  "palavra": "Lilás",
+  "categoria_ids": []
+}
+
+### Atualizar só as categorias (substitui todas). Ajuste o id para o da palavra criada.
+PATCH {{baseUrl}}/palavras/45
+Content-Type: application/json
+
+{
+  "categoria_ids": [3, 5]
+}
+
+### Excluir palavra (204). Palavras já usadas em quiz devolvem 409.
+DELETE {{baseUrl}}/palavras/45
+
+###############################################################################
+# QUIZZES
+###############################################################################
+
+### Criar quiz com palavras das categorias 3 (Cores) e 5 (Alimentos) - até 5 palavras sorteadas
+POST {{baseUrl}}/quizzes
+Content-Type: application/json
+
+{
+  "categoria_ids": [3, 5]
+}
+
+### Criar quiz sem categorias (400)
+POST {{baseUrl}}/quizzes
+Content-Type: application/json
+
+{
+  "categoria_ids": []
+}
+
+### Buscar quiz por id
+GET {{baseUrl}}/quizzes/1
+
+### Listar quizzes
+GET {{baseUrl}}/quizzes
+
+### Responder uma palavra do quiz (use um id de "quiz_palavras" da resposta do POST)
+PATCH {{baseUrl}}/quizzes/palavras/1/responder
+Content-Type: application/json
+
+{
+  "acertou": true
+}
+
+###############################################################################
+# USUÁRIOS
+###############################################################################
+
+### Listar usuários (a senha nunca é devolvida)
+GET {{baseUrl}}/usuarios
+
+### Buscar usuário
+GET {{baseUrl}}/usuarios/1
+
+### Criar usuário (201). A senha é gravada com hash BCrypt.
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Maria",
+  "email": "maria@email.com",
+  "senha": "Senha123"
+}
+
+### Criar usuário com e-mail inválido e senha fraca (400)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Maria",
+  "email": "maria",
+  "senha": "fraca"
+}
+
+### Criar usuário com e-mail já usado (409)
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Outro",
+  "email": "ADMIN@sinalize.com.br",
+  "senha": "Senha123"
+}
+
+### Trocar a senha. Ajuste o id para o do usuário criado.
+PATCH {{baseUrl}}/usuarios/2
+Content-Type: application/json
+
+{
+  "senha": "NovaSenha1"
+}
+
+### Excluir o usuário padrão (409: ele criou as categorias e palavras)
+DELETE {{baseUrl}}/usuarios/1
+
+### Excluir usuário sem registros (204). Ajuste o id.
+DELETE {{baseUrl}}/usuarios/2

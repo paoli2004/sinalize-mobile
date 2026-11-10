@@ -1,0 +1,15 @@
+# Perfil dos testes de integração.
+# Usa o mesmo PostgreSQL do docker-compose, mas em um schema separado ("it"),
+# para não interferir nos dados de desenvolvimento. O schema é recriado a cada execução.
+spring:
+  datasource:
+    url: ${DB_URL_IT:jdbc:postgresql://localhost:5433/sinalize?currentSchema=it}
+  flyway:
+    schemas: it
+    default-schema: it
+    create-schemas: true
+    clean-disabled: false
+  jpa:
+    properties:
+      hibernate:
+        default_schema: it
